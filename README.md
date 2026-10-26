@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Шаблон: прокат авто (сейчас — суперкары)
 
-## Getting Started
+Сайт на Next.js, весь текст на украинском, светлая тема с жёлтым акцентом (первый экран с видео — тёмный блок).
+В демо — прокат суперкаров в Киеве: Lamborghini, Ferrari, McLaren, Rolls-Royce и др., цены в долларах.
+Автопарк с фильтрами по классу и кузову, страница каждого авто (мощность, разгон, двигатель),
+онлайн-бронирование **от 3 часов до 30 суток** с расчётом цены. Заявка приходит админам в Telegram.
+Базы данных нет: свободно ли авто, менеджер подтверждает звонком.
 
-First, run the development server:
+## Как считается цена
+
+Вся логика в `src/lib/pricing.ts`. Её используют и сайт, и сервер, поэтому сумма в заявке всегда
+совпадает с тем, что видел гость (сервер пересчитывает её сам и не верит браузеру).
+
+| Срок | Как считаем |
+|---|---|
+| 3–12 часов | почасово, но **не дороже суток** |
+| 1–2 суток | цена суток |
+| 3–6 / 7–13 / 14–29 суток | скидка 10 / 15 / 20 % |
+| 30 суток | месячная цена |
+
+- Каждые начатые 24 часа — новые сутки, но **первый час опоздания бесплатно**.
+- Если более длинный тариф дешевле (13 суток дороже 14, 29 — дороже месяца), автоматически
+  ставится он. Проверено на всех машинах: более долгая аренда нигде не дешевле более короткой.
+- Время считается по киевским часам. Выдача 08:00–22:00 с шагом 30 минут, не раньше чем через 2 часа
+  от текущего момента и не дальше 60 дней вперёд.
+- Доп. услуги: подача за адресом и фотосессия (за аренду), личный водитель (за сутки).
+- С личным водителем гость не подтверждает возраст и стаж (25+ / 5+ лет): он сам не за рулём.
+
+Все цифры (скидки, лимиты, часы работы, услуги) — в `src/data/site.ts` → `tiers`, `rules`, `extras`.
+
+**Валюта** — `site.currency`: `"$"`, `"€"` или `"₴"`. По закону «Про захист прав споживачів» цены для
+покупателей в Украине нужно указывать в гривнах; доллары — для демо и если клиент сознательно так хочет.
+Для обычного проката (Logan, Corolla…) поставь `"₴"` и свой автопарк.
+
+## Под нового клиента
+
+- `src/data/site.ts`: название, город, контакты, преимущества, условия, FAQ и **автопарк**
+  (у каждой машины мощность, разгон, двигатель, цены за час, сутки, месяц и залог).
+- Фото: положить в `images-src/cars/<id>.jpg` (id как в `site.ts`, например `corolla.jpg`)
+  и `images-src/site/hero.jpg`, потом `npm run images`. Фото лучше на тёмном фоне — промпты уже такие. Пока фото нет, показывается силуэт.
+- Первый экран: `public/video/hero.mp4` (16:9, до ~5 МБ) и фото-заставка `images-src/site/hero.jpg`.
+  Без видео — убери `hero.video` в `site.ts`, останется фото. Кадр строится так: машина справа,
+  тёмное место слева под заголовок (на телефоне видео сверху, текст под ним).
+- Промпты для генерации — `../prompts/car-rental.md`.
+
+## Telegram
+
+Как у тату-салона: `.env.example` скопировать в `.env`, вписать токен бота и id админов через запятую.
+Если у одного админа бот заблокирован, остальные всё равно получат заявку.
+
+## Команды
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install     # один раз
+npm run images  # сжать фото из images-src/
+npm run dev     # локальный просмотр
+npm run build   # сборка
+npm start       # запуск собранного сайта
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Сайт с сервером (из-за отправки заявок): Vercel, Netlify или любой Node.js-хостинг.

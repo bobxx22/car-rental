@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
+/* Світлий преміальний стиль: теплий світлий фон, чорна типографіка, жовтий акцент як у суперкарів */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f3f3f0;
+  --surface: #ffffff;
+  --foreground: #0d0d0d;
+  --muted: #6b6b68;
+  --line: #e2e2dd;
+  --accent: #ffd21f;
+  --danger: #d93025;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* поля форми й дат — у стилі сайту */
+@layer components {
+  .field {
+    width: 100%;
+    height: 3.25rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0 0.875rem;
+    font-size: 1rem;
+    color: var(--foreground);
+    outline: none;
+    appearance: none;
+  }
+  .field:focus {
+    border-color: var(--foreground);
+  }
+  select.field {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%236b6b68' stroke-width='1.8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    padding-right: 2.25rem;
+  }
 }
